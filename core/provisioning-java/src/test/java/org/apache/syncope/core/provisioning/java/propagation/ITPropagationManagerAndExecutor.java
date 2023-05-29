@@ -1,15 +1,20 @@
 package org.apache.syncope.core.provisioning.java.propagation;
 
 import org.apache.syncope.common.lib.types.AnyTypeKind;
-import org.apache.syncope.core.persistence.api.dao.*;
-import org.apache.syncope.core.persistence.api.entity.*;
+import org.apache.syncope.core.persistence.api.dao.ExternalResourceDAO;
+import org.apache.syncope.core.persistence.api.dao.VirSchemaDAO;
+import org.apache.syncope.core.persistence.api.entity.AnyType;
+import org.apache.syncope.core.persistence.api.entity.AnyUtilsFactory;
 import org.apache.syncope.core.persistence.api.entity.anyobject.AnyObject;
 import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.user.User;
 import org.apache.syncope.core.provisioning.api.DerAttrHandler;
 import org.apache.syncope.core.provisioning.api.MappingManager;
+import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskExecutor;
 import org.apache.syncope.core.provisioning.java.propagation.dummies.*;
-import org.apache.syncope.core.provisioning.java.propagation.utils.*;
+import org.apache.syncope.core.provisioning.java.propagation.utils.AnyObjectAnyType;
+import org.apache.syncope.core.provisioning.java.propagation.utils.GroupAnyType;
+import org.apache.syncope.core.provisioning.java.propagation.utils.UserAnyType;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.junit.After;
@@ -17,25 +22,36 @@ import org.junit.Before;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 
 /**
- * Support class for GetCreateTasksTest
+ * Integration Testing between GetCreateTasksTest and ExecuteTaskTest
  * 
  * @author Enrico D'Alessandro
  */
-public abstract class DefaultPropagationManagerTest {
+public abstract class ITPropagationManagerAndExecutor {
 
-    protected VirSchemaDAO virSchemaDAO; //yes
-    protected AnyUtilsFactory anyUtilsFactory; //yes
-    protected ExternalResourceDAO externalResourceDAO; //yes
-    protected MappingManager mappingManager; //yes
-    protected DerAttrHandler derAttrHandler; //yes
+    /* PropagationTaskExecutor attributes */
+    protected MockedStatic<SecurityContextHolder> holder;
+    protected PropagationTaskExecutor taskExecutor;
 
-    protected MockedStatic<ApplicationContextProvider> context;
+    /* DefaultPropagationManager attributes */
+    protected VirSchemaDAO virSchemaDAO;
+    protected AnyUtilsFactory anyUtilsFactory;
+    protected ExternalResourceDAO externalResourceDAO;
+    protected MappingManager mappingManager;
+    protected DerAttrHandler derAttrHandler;
 
     protected DummyProvision provision;
     private DummyVirSchema virSchema;
@@ -43,7 +59,43 @@ public abstract class DefaultPropagationManagerTest {
     private DummyMapping mapping;
     private AnyType anyType;
 
-    public DefaultPropagationManagerTest(AnyTypeKind anyTypeKind) {
+    /* Common attributes */
+    protected MockedStatic<ApplicationContextProvider> context;
+
+    @Before
+    public void setUp() {
+        /* Module PropagationTaskExecutor set up */
+        SecurityContext ctx = Mockito.mock(SecurityContext.class);
+        List<GrantedAuthority> authorityList = new ArrayList<>();
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROOT");
+        authorityList.add(authority);
+        Authentication auth = new UsernamePasswordAuthenticationToken("principal", "credentials", authorityList);
+        holder = Mockito.mockStatic(SecurityContextHolder.class);
+        holder.when(SecurityContextHolder::getContext).thenReturn(ctx);
+        Mockito.when(ctx.getAuthentication()).thenReturn(auth);
+
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        DefaultPropagationTaskCallable taskCallable = new DefaultPropagationTaskCallable();
+        factory.registerSingleton("callable", taskCallable);
+
+        /* Module DefaultPropagationManager set up */
+        DummyAnyTypeDAO dummyAnyTypeDAO = new DummyAnyTypeDAO();
+        factory.registerSingleton("dummyAnyTypeDAO", dummyAnyTypeDAO);
+        factory.autowireBean(dummyAnyTypeDAO);
+        factory.initializeBean(dummyAnyTypeDAO, "Master");
+
+        context = Mockito.mockStatic(ApplicationContextProvider.class);
+        context.when(ApplicationContextProvider::getBeanFactory).thenReturn(factory);
+    }
+
+    @After
+    public void tearDown() {
+        holder.close();
+        context.close();
+    }
+
+    public ITPropagationManagerAndExecutor(AnyTypeKind anyTypeKind) {
+        /* init DefaultPropagationManager test */
         initDummyImpl(anyTypeKind);
         this.externalResourceDAO = getMockedExternalResourceDAO();
         this.virSchemaDAO = getMockedVirSchemaDAO();
@@ -118,7 +170,7 @@ public abstract class DefaultPropagationManagerTest {
                 .thenReturn(new ArrayList<>(Collections.singleton(this.virSchema)));
         return virSchema;
     }
-
+    
     public void settingDummyImpl(AnyTypeKind anyTypeKind) {
         /* setting dummies */
         this.mapping.add(new DummyMappingItem());
@@ -128,25 +180,6 @@ public abstract class DefaultPropagationManagerTest {
         provision.setAnyType(this.anyType);
         provision.setObjectClass(new ObjectClass(ObjectClass.ACCOUNT_NAME));
         this.externalResource.add(provision);
-    }
-    
-    
-    // Le classi di test che estenderanno questa classe avranno questi Before e After 
-    @Before
-    public void setUp() {
-        DummyAnyTypeDAO dummyAnyTypeDAO = new DummyAnyTypeDAO();
-        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        factory.registerSingleton("dummyAnyTypeDAO", dummyAnyTypeDAO);
-        factory.autowireBean(dummyAnyTypeDAO);
-        factory.initializeBean(dummyAnyTypeDAO, "Master");
-
-        context = Mockito.mockStatic(ApplicationContextProvider.class);
-        context.when(ApplicationContextProvider::getBeanFactory).thenReturn(factory);
-    }
-
-    @After
-    public void tearDown() {
-        context.close();
     }
     
 }

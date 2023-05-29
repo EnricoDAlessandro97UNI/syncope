@@ -17,6 +17,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Support class for ExecuteTaskTest
+ * 
+ * @author Enrico D'Alessandro
+ */
 public abstract class PriorityPropagationTaskExecutorTest {
 
     protected MockedStatic<ApplicationContextProvider> context;

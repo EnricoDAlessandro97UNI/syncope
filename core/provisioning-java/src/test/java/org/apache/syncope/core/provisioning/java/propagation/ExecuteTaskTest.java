@@ -20,6 +20,12 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+
+/**
+ * Test class for getCreateTasks method of DefaultPropagationManager class
+ * 
+ * @author Enrico D'Alessandro
+ */
 @RunWith(Parameterized.class)
 public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
 

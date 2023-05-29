@@ -35,6 +35,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
+
+/**
+ * Test class for getCreateTasks method of DefaultPropagationManager class
+ * 
+ * @author Enrico D'Alessandro
+ */
 @RunWith(Parameterized.class)
 public class GetCreateTasksTest extends DefaultPropagationManagerTest {
 
