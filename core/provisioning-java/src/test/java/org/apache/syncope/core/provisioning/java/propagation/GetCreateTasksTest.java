@@ -51,14 +51,14 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
     protected List<PropagationTaskInfo> expected;
     protected Exception expectedError;
 
-    public GetCreateTasksTest(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable, ParamType propByResType, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType ExpectedType) {
+    public GetCreateTasksTest(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable, ParamType propByResType, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType expectedType) {
         super(anyTypeKind);
-        System.out.println("anyTypeKind = " + anyTypeKind + ", keyType = " + keyType + ", enable = " + enable + ", propByResType = " + propByResType + ", vAttrType = " + vAttrType + ", noPropResourceKeysType = " + noPropResourceKeysType + ", ExpectedType = " + ExpectedType);
-        configure(anyTypeKind, keyType, enable, propByResType, vAttrType, noPropResourceKeysType, ExpectedType);
+        System.out.println("anyTypeKind = " + anyTypeKind + ", keyType = " + keyType + ", enable = " + enable + ", propByResType = " + propByResType + ", vAttrType = " + vAttrType + ", noPropResourceKeysType = " + noPropResourceKeysType + ", ExpectedType = " + expectedType);
+        configure(anyTypeKind, keyType, enable, propByResType, vAttrType, noPropResourceKeysType, expectedType);
     }
 
-    private void configure(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable, ParamType propByResType, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType ExpectedType) {
-        System.out.println("IN CONFIG: "+"anyTypeKind = " + anyTypeKind + ", keyType = " + keyType + ", enable = " + enable + ", propByResType = " + propByResType + ", vAttrType = " + vAttrType + ", noPropResourceKeysType = " + noPropResourceKeysType + ", ExpectedType = " + ExpectedType);
+    private void configure(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable, ParamType propByResType, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType expectedType) {
+        System.out.println("IN CONFIG: "+"anyTypeKind = " + anyTypeKind + ", keyType = " + keyType + ", enable = " + enable + ", propByResType = " + propByResType + ", vAttrType = " + vAttrType + ", noPropResourceKeysType = " + noPropResourceKeysType + ", ExpectedType = " + expectedType);
         this.propagationManager = new DefaultPropagationManager(
                 virSchemaDAO,
                 externalResourceDAO,
@@ -77,12 +77,12 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
         configurePropByRes(propByResType);
         configureVAttr(vAttrType);
         configureNoPropResourceKeys(noPropResourceKeysType);
-        configureExpected(ExpectedType);
-        System.out.println("anyTypeKind = " + anyTypeKind + ", key = " + key + ", enable = " + enable + ", propByRes = " + propByRes+ ", vAttr = " + vAttr + ", noPropResourceKeys = " + noPropResourceKeys + ", ExpectedType = " + ExpectedType);
+        configureExpected(expectedType);
+        System.out.println("anyTypeKind = " + anyTypeKind + ", key = " + key + ", enable = " + enable + ", propByRes = " + propByRes+ ", vAttr = " + vAttr + ", noPropResourceKeys = " + noPropResourceKeys + ", ExpectedType = " + expectedType);
     }
 
-    private void configureExpected(ExpectedType ExpectedType) {
-        switch (ExpectedType) {
+    private void configureExpected(ExpectedType expectedType) {
+        switch (expectedType) {
             case OK:
                 this.expected = new ArrayList<>(Collections.singleton(new PropagationTaskInfo(externalResourceDAO.find("testResource"))));
                 break;
