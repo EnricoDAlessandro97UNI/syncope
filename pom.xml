@@ -2835,6 +2835,7 @@ under the License.
         <argLine>-Xms512m -Xmx1024m -Xss256k --add-opens java.base/java.net=ALL-UNNAMED</argLine>
       </properties>
     </profile>
+  </profiles>
 
   <modules>
     <module>common</module>
@@ -2846,9 +2847,6 @@ under the License.
     <module>ext</module>
     <module>archetype</module>
     <module>standalone</module>
-
-    <!-- ISW2 - MY MODULE FOR COVERAGE -->
-    <module>tests-coverage</module>
     
   </modules>
 
