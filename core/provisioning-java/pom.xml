@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.syncope</groupId>
+    <artifactId>syncope-core</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+  </parent>
+
+  <name>Apache Syncope Core Provisioning Java</name>
+  <description>Apache Syncope Core Provisioning Java</description>
+  <groupId>org.apache.syncope.core</groupId>
+  <artifactId>syncope-core-provisioning-java</artifactId>
+  <packaging>jar</packaging>
+  
+  <properties>
+    <rootpom.basedir>${basedir}/../..</rootpom.basedir>
+  </properties>
+
+  <dependencies>
+    <dependency> 
+      <groupId>jakarta.servlet</groupId> 
+      <artifactId>jakarta.servlet-api</artifactId> 
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context-support</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.retry</groupId>
+      <artifactId>spring-retry</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.geronimo.javamail</groupId>
+      <artifactId>geronimo-javamail_1.4_mail</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-csv</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-templates</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-xml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-jsr223</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-datetime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-dateutil</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-sql</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.syncope.core</groupId>
+      <artifactId>syncope-core-workflow-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.syncope.core</groupId>
+      <artifactId>syncope-core-spring</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <!-- TEST -->
+    <dependency>
+      <groupId>org.apache.syncope.core</groupId>
+      <artifactId>syncope-core-workflow-java</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.syncope.core</groupId>
+      <artifactId>syncope-core-persistence-jpa</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>4.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>4.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <id>set-bundles</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+
+      <!-- Integration Testing -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.0.0-M6</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+      <testResource>
+        <directory>${basedir}/../persistence-jpa/src/main/resources</directory>
+        <includes>
+          <include>persistence.properties</include>
+        </includes>
+        <filtering>true</filtering>
+      </testResource>
+      <testResource>
+        <directory>${basedir}/../persistence-jpa/src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+  </build>
+
+  <profiles>
+<!--    &lt;!&ndash; ISW2-BA-DUA PROFILE &ndash;&gt;-->
+<!--    <profile>-->
+<!--      <id>badua-profile</id>-->
+<!--      <activation>-->
+<!--        <activeByDefault>false</activeByDefault>-->
+<!--      </activation>-->
+<!--      <properties>-->
+<!--        <ba-dua.version>0.6.0</ba-dua.version>-->
+<!--        <argLine>-javaagent:target/dependency/ba-dua-agent-rt-${ba-dua.version}-all.jar -Doutput.file=target/badua.ser</argLine>-->
+<!--      </properties>-->
+<!--      <dependencies>-->
+<!--        <dependency>-->
+<!--          <groupId>br.usp.each.saeg</groupId>-->
+<!--          <artifactId>ba-dua-cli</artifactId>-->
+<!--          <version>0.6.0</version>-->
+<!--        </dependency>-->
+<!--      </dependencies>-->
+<!--      <build>-->
+<!--        <plugins>-->
+
+<!--          &lt;!&ndash; Copy ba-dua-agent-rt from .m2 directory to target/dependency &ndash;&gt;-->
+<!--          <plugin>-->
+<!--            <groupId>org.apache.maven.plugins</groupId>-->
+<!--            <artifactId>maven-dependency-plugin</artifactId>-->
+<!--            <version>2.10</version>-->
+<!--            <executions>-->
+<!--              <execution>-->
+<!--                <goals>-->
+<!--                  <goal>copy</goal>-->
+<!--                </goals>-->
+<!--                <configuration>-->
+<!--                  <artifactItems>-->
+<!--                    <artifactItem>-->
+<!--                      <groupId>br.usp.each.saeg</groupId>-->
+<!--                      <artifactId>ba-dua-agent-rt</artifactId>-->
+<!--                      <classifier>all</classifier>-->
+<!--                      <version>${ba-dua.version}</version>-->
+<!--                      <outputDirectory>${project.basedir}/target/dependency</outputDirectory>-->
+<!--                    </artifactItem>-->
+<!--                  </artifactItems>-->
+<!--                </configuration>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
+
+<!--          &lt;!&ndash; Generate report in xml format &ndash;&gt;-->
+<!--          <plugin>-->
+<!--            <groupId>org.codehaus.mojo</groupId>-->
+<!--            <artifactId>exec-maven-plugin</artifactId>-->
+<!--            <version>1.5.0</version>-->
+<!--            <executions>-->
+<!--              <execution>-->
+<!--                <goals>-->
+<!--                  <goal>java</goal>-->
+<!--                </goals>-->
+<!--                <phase>verify</phase>-->
+<!--                <configuration>-->
+<!--                  <mainClass>br.usp.each.saeg.badua.cli.Report</mainClass>-->
+<!--                  <arguments>-->
+<!--                    <argument>-input</argument>-->
+<!--                    <argument>${project.build.directory}/badua.ser</argument>-->
+<!--                    <argument>-classes</argument>-->
+<!--                    <argument>${project.build.outputDirectory}</argument>-->
+<!--                    <argument>-show-classes</argument>-->
+<!--                    <argument>-show-methods</argument>-->
+<!--                    <argument>-xml</argument>-->
+<!--                    <argument>${project.build.directory}/badua.xml</argument>-->
+<!--                  </arguments>-->
+<!--                </configuration>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
+<!--        </plugins>-->
+<!--      </build>-->
+<!--    </profile>-->
+
+    <!-- ISW2-PITest profile -->
+    <profile>
+      <id>mutation-coverage-profile</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.8.0</version>
+            <configuration>
+              <verbose>true</verbose>
+              <targetClasses>
+                <!-- classes to test  -->
+                <param>org.apache.syncope.core.provisioning.java.propagation.DefaultPropagationManager</param><!-- class 1 to test -->
+                <param>org.apache.syncope.core.provisioning.java.propagation.PriorityPropagationTaskExecutor</param><!-- class 2 to test -->
+              </targetClasses>
+              <targetTests>
+                <!-- test implementations -->
+                <param>org.apache.syncope.core.provisioning.java.propagation.GetCreateTasksTest</param>
+                <param>org.apache.syncope.core.provisioning.java.propagation.GetUpdateTasksTest</param>
+                <param>org.apache.syncope.core.provisioning.java.propagation.GetUserCreateTasksTest</param>
+                <param>org.apache.syncope.core.provisioning.java.propagation.ExecuteTaskTest</param>
+              </targetTests>
+            </configuration>
+            <executions>
+              <execution>
+                <id>Mutation Report</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
