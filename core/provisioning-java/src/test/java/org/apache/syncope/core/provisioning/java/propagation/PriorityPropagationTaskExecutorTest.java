@@ -1,12 +1,9 @@
 package org.apache.syncope.core.provisioning.java.propagation;
 
-import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskExecutor;
 import org.apache.syncope.core.spring.ApplicationContextProvider;
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.mockito.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -27,10 +26,9 @@ public abstract class PriorityPropagationTaskExecutorTest {
 
     protected MockedStatic<ApplicationContextProvider> context;
     protected MockedStatic<SecurityContextHolder> holder;
-    protected PropagationTaskExecutor taskExecutor;
 
-    @Before
-    public void setUp() {
+    public PriorityPropagationTaskExecutorTest() {
+        /* Mock securityContext and auth */
         SecurityContext ctx = Mockito.mock(SecurityContext.class);
         List<GrantedAuthority> authorityList = new ArrayList<>();
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROOT");
@@ -38,13 +36,11 @@ public abstract class PriorityPropagationTaskExecutorTest {
         Authentication auth = new UsernamePasswordAuthenticationToken("principal", "credentials", authorityList);
         holder = Mockito.mockStatic(SecurityContextHolder.class);
         holder.when(SecurityContextHolder::getContext).thenReturn(ctx);
-        Mockito.when(ctx.getAuthentication()).thenReturn(auth);
+        when(ctx.getAuthentication()).thenReturn(auth);
+    }
 
-        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        DefaultPropagationTaskCallable taskCallable = new DefaultPropagationTaskCallable();
-        factory.registerSingleton("callable", taskCallable);
-        context = Mockito.mockStatic(ApplicationContextProvider.class);
-        context.when(ApplicationContextProvider::getBeanFactory).thenReturn(factory);
+    @Before
+    public void setUp() {
     }
 
     @After

@@ -4,5 +4,6 @@ public enum ExpectedType {
 	OK,
 	FAIL,
 	NOT_FOUND_ERROR,
+	VOID,
 	NULL_PTR_ERROR
 }

@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class GroupTested implements Group {
-    private String key;
+	
+    private static final long serialVersionUID = 1L;
+	private String key;
 
     @Override
     public OffsetDateTime getCreationDate() {

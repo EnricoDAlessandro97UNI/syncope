@@ -10,7 +10,8 @@ import java.util.List;
 
 public class GroupAnyType extends AbstractProvidedKeyEntity implements AnyType {
 
-    private AnyTypeKind kind;
+    private static final long serialVersionUID = 1L;
+	private AnyTypeKind kind;
     private List<AnyTypeClass> classes = new ArrayList<>();
 
     @Override

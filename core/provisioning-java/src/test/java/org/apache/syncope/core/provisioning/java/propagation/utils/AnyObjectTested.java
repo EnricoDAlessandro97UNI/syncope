@@ -6,9 +6,6 @@ import org.apache.syncope.core.persistence.api.entity.anyobject.APlainAttr;
 import org.apache.syncope.core.persistence.api.entity.anyobject.ARelationship;
 import org.apache.syncope.core.persistence.api.entity.anyobject.AnyObject;
 import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
-import org.apache.syncope.core.persistence.jpa.entity.JPAAnyType;
-import org.apache.syncope.core.provisioning.java.propagation.dummies.DummyAnyTypeDAO;
-import org.apache.syncope.core.spring.ApplicationContextProvider;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -16,7 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class AnyObjectTested implements AnyObject {
-    private String key;
+	
+    private static final long serialVersionUID = 1L;
+	private String key;
     private AnyType type;
 
     @Override

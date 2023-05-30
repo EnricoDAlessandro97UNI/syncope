@@ -55,22 +55,18 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
-        		// ANY_TYPE_KIND		KEY					ENABLE	PROP_BY_RES			V_ATTR				NO_PROP_RES_KEY		EXPECTED_RESULT_TYPE
-        		// Unidimensionale
-                {	null, 				ParamType.NULL, 	true, 	ParamType.NULL, 	ParamType.NULL, 	ParamType.NULL, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 	ParamType.NULL, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	AnyTypeKind.USER, 	ParamType.EMPTY, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	AnyTypeKind.USER, 	ParamType.INVALID,	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	false,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.EMPTY, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.FAIL				},
-                {	AnyTypeKind.USER, 	ParamType.VALID,	true, 	ParamType.INVALID,	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.FAIL				},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.NULL,	 	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.INVALID,	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.NULL, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.INVALID,	ExpectedType.FAIL				},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					}
+        		// 	ANY_TYPE_KIND			KEY					ENABLE	PROP_BY_RES			V_ATTR				NO_PROP_RES_KEY		EXPECTED_RESULT_TYPE
+        		//	Unidimensionale
+        		{	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+        		{	AnyTypeKind.GROUP, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.ANY_OBJECT, ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.INVALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.NULL, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID,	null, 	ParamType.INVALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.INVALID, 	ExpectedType.FAIL				},
         });
     }
 

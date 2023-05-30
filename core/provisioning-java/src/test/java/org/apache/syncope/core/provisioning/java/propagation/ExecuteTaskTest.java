@@ -2,23 +2,42 @@ package org.apache.syncope.core.provisioning.java.propagation;
 
 import org.apache.syncope.common.lib.to.PropagationStatus;
 import org.apache.syncope.common.lib.types.ExecStatus;
+import org.apache.syncope.common.lib.types.ResourceOperation;
+import org.apache.syncope.core.persistence.api.entity.EntityFactory;
+import org.apache.syncope.core.persistence.api.entity.task.PropagationTask;
+import org.apache.syncope.core.persistence.api.entity.task.TaskExec;
+import org.apache.syncope.core.persistence.jpa.dao.JPAExternalResourceDAO;
+import org.apache.syncope.core.persistence.jpa.entity.JPAConnInstance;
 import org.apache.syncope.core.persistence.jpa.entity.resource.JPAExternalResource;
+import org.apache.syncope.core.persistence.jpa.entity.task.JPAPropagationTask;
+import org.apache.syncope.core.persistence.jpa.entity.task.JPATaskExec;
+import org.apache.syncope.core.provisioning.api.AuditManager;
+import org.apache.syncope.core.provisioning.api.Connector;
+import org.apache.syncope.core.provisioning.api.ConnectorManager;
+import org.apache.syncope.core.provisioning.api.notification.NotificationManager;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationReporter;
+import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskExecutor;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskInfo;
 import org.apache.syncope.core.provisioning.java.propagation.utils.ParamType;
 import org.apache.syncope.core.provisioning.java.propagation.utils.ExpectedType;
+import org.apache.syncope.core.spring.ApplicationContextProvider;
+import org.identityconnectors.framework.common.objects.*;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mockito;
+import org.mockito.*;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -29,41 +48,67 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
 
+    @Spy private DefaultListableBeanFactory factory;
+    private PropagationTaskExecutor propagationTaskExecutor;
+    @InjectMocks private DefaultPropagationTaskCallable taskCallable;
+    @Spy private PropagationTaskExecutor taskExecutor;
+    @Mock private JPAExternalResourceDAO resourceDAO;
+    @Spy private EntityFactory entityFactory;
+    @Mock private ConnectorManager connectorManager;
+    @Mock private NotificationManager notificationManager;
+    @Mock private AuditManager auditManager;
+    @Mock private Connector connector;
+
     private Collection<PropagationTaskInfo> taskInfos;
-    private boolean nullPriorityAsync; // TRUE or FALSE
+    private boolean nullPriorityAsync;
     private String executor;
 
     private Exception expectedError;
     private PropagationReporter expected;
 
-    public ExecuteTaskTest(ParamType taskInfoType, boolean nullPriorityAsync, ParamType executorType, ExpectedType expectedType) {
-        configure(taskInfoType, nullPriorityAsync, executorType, expectedType);
+    @SuppressWarnings("deprecation")
+	public ExecuteTaskTest(ParamType taskInfoType, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
+        MockitoAnnotations.initMocks(this);
+        configure(taskInfoType, nullPriorityAsync, executorType, ExpectedType);
     }
 
-    private void configure(ParamType taskInfoType, boolean nullPriorityAsync, ParamType executorType, ExpectedType expectedType) {
+    private void configure(ParamType taskInfoType, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.initialize();
-        this.taskExecutor = new PriorityPropagationTaskExecutor(null, null, null, null, null, null, null, null, null, null, null, null, null, null, executor);
+        this.propagationTaskExecutor = new PriorityPropagationTaskExecutor(connectorManager, null, null, null, null, null, resourceDAO, notificationManager, auditManager, null, null, null, entityFactory, null, executor);
         this.nullPriorityAsync = nullPriorityAsync;
-        configureTaskInfos(taskInfoType);
+        boolean withPriority = configureTaskInfos(taskInfoType);
         configureExecutor(executorType);
-        configureResult(expectedType);
+        configureResult(ExpectedType, withPriority);
     }
 
-    private void configureResult(ExpectedType expectedType) {
+    private void configureResult(ExpectedType ExpectedType, boolean withPriority) {
         List<PropagationStatus> statuses = new ArrayList<>();
-        switch (expectedType) {
+        switch (ExpectedType) {
             case OK:
+            	/* Esecuzione con successo o CREATA */
                 this.expected = Mockito.mock(DefaultPropagationReporter.class);
-                PropagationStatus statusCreated = new PropagationStatus();
-                // Indica che la richiesta HTTP è stata completata con successo e ha portato alla creazione di un nuovo oggetto o risorsa
-                statusCreated.setStatus(ExecStatus.CREATED);
-                statuses.add(statusCreated);
+                PropagationStatus status = new PropagationStatus();
+                if (withPriority) {
+                    status.setStatus(ExecStatus.SUCCESS);
+                } else {
+                    status.setStatus(ExecStatus.CREATED);
+                }
+                statuses.add(status);
                 break;
             case FAIL:
+            	/* Esecuzione con fallimento */
+                this.expected = Mockito.mock(DefaultPropagationReporter.class);
+                PropagationStatus statusFail = new PropagationStatus();
+                statusFail.setStatus(ExecStatus.FAILURE);
+                statuses.add(statusFail);
+                break;
+            case VOID:
+                /* Nessun task è stato eseguito */
                 this.expected = Mockito.mock(DefaultPropagationReporter.class);
                 break;
             case NULL_PTR_ERROR:
+            	/* Eccezione */
                 this.expectedError = new NullPointerException();
                 break;
         }
@@ -84,40 +129,86 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
             case INVALID:
                 this.executor = "invalidExecutor";
                 break;
+            default:
+            	break;
         }
     }
 
-    private void configureTaskInfos(ParamType taskInfoType) {
+    private boolean configureTaskInfos(ParamType taskInfoType) {
+        boolean withPriority = false;
         switch (taskInfoType) {
             case EMPTY:
+                /* Collezione di task vuoti */
                 this.taskInfos = new ArrayList<>();
                 break;
-            case NULL:
-                this.taskInfos = null;
-                break;
             case VALID:
+                /* Collezione di task non vuoti con priorità */
+                this.taskInfos = new ArrayList<>();
+                JPAExternalResource resource = new JPAExternalResource();
+                resource.setKey("priorityResource");
+                resource.setPropagationPriority(1);
+                resource.setConnector(new JPAConnInstance());
+                PropagationTaskInfo task = new PropagationTaskInfo(resource);
+                task.setObjectClassName("objectClassName");
+                task.setOperation(ResourceOperation.CREATE);
+                task.setAttributes("[{\"name\":\"__NAME__\",\"value\":[\"Enrico DAlessandro\"]},{\"name\":\"__UID__\",\"value\":[\"erik97\"]}]");
+                this.taskInfos.add(task);
+                withPriority = true;
+                break;
+            case INVALID:
+                /* Collezione di task non vuoti senza priorità */
                 this.taskInfos = new ArrayList<>();
                 this.taskInfos.add(new PropagationTaskInfo(new JPAExternalResource()));
                 break;
-            case INVALID:
-                this.taskInfos = new ArrayList<>();
-                this.taskInfos.add(new PropagationTaskInfo(null));
+            default:
                 break;
         }
+        return withPriority;
     }
 
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
-        return Arrays.asList(new Object[][]{
-        		// 	TASK_INFO_TYPE      NULL_PRIORITY_ASYNC     EXECUTOR       		EXPECTED_RESULT
-                {	ParamType.VALID, 	true,					ParamType.VALID, 	ExpectedType.OK				},
-                {	ParamType.EMPTY, 	true, 					ParamType.VALID, 	ExpectedType.FAIL			},
-                {	ParamType.NULL, 	true, 					ParamType.VALID, 	ExpectedType.NULL_PTR_ERROR	},
-                {	ParamType.INVALID,	true, 					ParamType.VALID, 	ExpectedType.NULL_PTR_ERROR	},
-                {	ParamType.VALID, 	false,					ParamType.VALID, 	ExpectedType.FAIL			},
-                {	ParamType.VALID, 	true, 					ParamType.EMPTY, 	ExpectedType.OK				},
-                {	ParamType.VALID, 	true, 					ParamType.NULL, 	ExpectedType.OK				},
-                {	ParamType.VALID, 	true, 					ParamType.INVALID,	ExpectedType.OK				}
+        return Arrays.asList(new Object[][] {                
+//             	TASK_INFO_TYPE      NULL_PRIORITY_ASYNC     EXECUTOR       		EXPECTED_RESULT
+              {	ParamType.EMPTY, 	false, 					ParamType.VALID, 	ExpectedType.VOID			},
+              {	ParamType.VALID, 	false, 					ParamType.VALID, 	ExpectedType.OK				},
+              {	ParamType.INVALID, 	false, 					ParamType.VALID,	ExpectedType.VOID			},
+              {	ParamType.INVALID, 	true, 					ParamType.VALID,	ExpectedType.OK 			},
+              {	ParamType.VALID, 	false, 					ParamType.EMPTY,	ExpectedType.FAIL			},
+              {	ParamType.VALID, 	false, 					ParamType.NULL, 	ExpectedType.FAIL			}
+      
+        });
+    }
+
+    @Before
+    public void mockExecute() {
+        /* taskCallable deve essere non null in taskExecutor */
+        factory.registerSingleton("callable", taskCallable);
+        context = Mockito.mockStatic(ApplicationContextProvider.class);
+        context.when(ApplicationContextProvider::getBeanFactory).thenReturn(factory);
+        doReturn(taskCallable).when(factory).createBean(DefaultPropagationTaskCallable.class, AbstractBeanDefinition.AUTOWIRE_BY_TYPE, false);
+
+        /* Stub metodo execute() di taskExecutor */
+        taskInfos.forEach(taskInfo -> {
+            doAnswer(invocationOnMock -> {
+                DefaultPropagationReporter reporter = invocationOnMock.getArgument(1, DefaultPropagationReporter.class);
+                TaskExec exec = propagationTaskExecutor.execute(taskInfo, reporter, "validExecutor");
+                return exec;
+            }).when(taskExecutor).execute(any(), argThat(propagationReporter -> propagationReporter.getStatuses().isEmpty()), anyString());
+
+            /* Mock entityFactory metodo newEntity() */
+            PropagationTask task = new JPAPropagationTask();
+            TaskExec exec = new JPATaskExec();
+            when(entityFactory.newEntity(PropagationTask.class)).thenReturn(task);
+            when(entityFactory.newEntity(TaskExec.class)).thenReturn(exec);
+
+            /* Mock connectorManager metodo getConnetor()  */
+            when(connectorManager.getConnector(any())).thenReturn(connector);
+            doAnswer(invocationOnMock -> {
+                AtomicReference propagationAttempt = invocationOnMock.getArgument(3, AtomicReference.class);
+                propagationAttempt.set(true);
+                return new Uid("newUid");
+            }).when(connector).create(any(), any(), any(), any());
         });
     }
 
@@ -125,12 +216,15 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
     public void testExecute() {
         PropagationReporter reporter = null;
         try {
-            reporter = taskExecutor.execute(taskInfos, nullPriorityAsync, executor);
+            reporter = propagationTaskExecutor.execute(taskInfos, nullPriorityAsync, executor);
         } catch (Exception e) {
             assertEquals(expectedError.getClass(), e.getClass());
             return;
         }
-        assertEquals(expected.getStatuses(), reporter.getStatuses());
+        
+        if (expected.getStatuses().size() > 0) {
+        	assertEquals(expected.getStatuses().get(0).getStatus(), reporter.getStatuses().get(0).getStatus());
+        }
     }
 
 

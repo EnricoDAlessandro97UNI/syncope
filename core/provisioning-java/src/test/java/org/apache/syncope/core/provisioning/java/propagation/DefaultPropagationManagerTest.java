@@ -36,8 +36,11 @@ import org.identityconnectors.framework.common.objects.Uid;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,6 +58,12 @@ public abstract class DefaultPropagationManagerTest {
 	protected static final String MY_UID = "erik97";
 	protected static final String MY_EMAIL = "test@gmail.com";
 	
+	/* Inizializzazione di Mockito */
+	@Rule public MockitoRule rule = MockitoJUnit.rule();
+	
+	/* Attributi utilizzati per la creazione di un'istanza valida di
+	 * DefaultPropagationManager isolando la dipendenza tramite l'uso
+	 * di oggetti mockati */
 	protected VirSchemaDAO virSchemaDAO; 
     protected AnyUtilsFactory anyUtilsFactory; 
     protected ExternalResourceDAO externalResourceDAO; 
@@ -69,6 +78,7 @@ public abstract class DefaultPropagationManagerTest {
     private DummyMapping mapping;
     private AnyType anyType;
 
+    // An interface for DefaultPropagationManager
     protected PropagationManager propagationManager;
 
     protected AnyTypeKind anyTypeKind;
@@ -80,8 +90,9 @@ public abstract class DefaultPropagationManagerTest {
 
     protected List<PropagationTaskInfo> expected;
     protected Exception expectedError;
-
+    
     public DefaultPropagationManagerTest(AnyTypeKind anyTypeKind) {
+    	//MockitoAnnotations.initMocks(this);
         initDummyImpl(anyTypeKind);
         this.externalResourceDAO = getMockedExternalResourceDAO();
         this.virSchemaDAO = getMockedVirSchemaDAO();

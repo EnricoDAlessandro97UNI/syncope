@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserTested implements User {
-    private String key;
+	
+	private static final long serialVersionUID = 1L;
+	private String key;
 
     @Override
     public OffsetDateTime getCreationDate() {
