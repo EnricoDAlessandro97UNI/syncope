@@ -58,30 +58,25 @@ public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
         configureAnyType(AnyTypeKind.USER, this.getClass().getName());
         configureKey(keyType);
         configurePass(passType);
-        configurePropByRes(propByResType,false, false, false);
+        configurePropByRes(propByResType);
         configureLinkedAccount(propByLinkedAccountType, noProp);
         configureVAttr(vAttrType);
         configureNoPropResourceKeys(noPropResourceKeysType);
         configureExpected(expectedType);
-        System.out.println("anyTypeKind = " + anyTypeKind + ", key = " + key + ", enable = " + enable + ", propByRes = " + propByRes+ ", vAttr = " + vAttr + ", noPropResourceKeys = " + noPropResourceKeys + ", ExpectedType = " + expectedType);
     }
 
     private void configurePass(ParamType passType) {
         switch (passType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.password = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.password = "";
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.password = "myPass";
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -92,16 +87,13 @@ public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
 
         switch (propByLinkedAccountType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.propByLinkedAccount = null;
                 break;
             case EMPTY:
             	// Mutation testing: propByLinkedAccount è vuoto
-                System.out.println("CASE EMPTY");
                 this.propByLinkedAccount = linked;
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 if (noProp) {
                     pair = new ImmutablePair<>("validKey", "myAccount");
                     linked.add(ResourceOperation.CREATE, pair);
@@ -111,12 +103,10 @@ public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
                 this.propByLinkedAccount = linked;
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 linked.add(ResourceOperation.DELETE, pair);
                 this.propByLinkedAccount = linked;
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
 
@@ -149,14 +139,7 @@ public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
 
     @Test
     public void testGetUserCreateTask() {
-        System.out.println("key: "+key);
-        System.out.println("password: "+password);
-        System.out.println("enable: "+enable);
-        System.out.println("propByRes: "+propByRes);
-        System.out.println("propByLinkedAccount: "+propByLinkedAccount);
-        System.out.println("vAttr: "+vAttr);
-        System.out.println("noPropResourceKeys: "+noPropResourceKeys);
-        List<PropagationTaskInfo> createTasks = null;
+        List<PropagationTaskInfo> createTasks;
         try {
             createTasks = propagationManager.getUserCreateTasks(key, password, enable, propByRes, propByLinkedAccount, vAttr, noPropResourceKeys);
             if (createTasks.size() == 1) {

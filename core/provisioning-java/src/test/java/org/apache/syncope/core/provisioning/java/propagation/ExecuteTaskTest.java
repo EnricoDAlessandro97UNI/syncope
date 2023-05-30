@@ -146,9 +146,6 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
             case VALID:
                 this.executor = "validExecutor";
                 break;
-            case INVALID:
-                this.executor = "invalidExecutor";
-                break;
             default:
             	break;
         }
@@ -207,6 +204,7 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
 //             	TASK_INFO_TYPE		NUM_ELEMENTS	NUM_SAME_PR	NUM_WITH_PR	NULL_PRIORITY_ASYNC     EXECUTOR       		EXPECTED_RESULT
 				{ParamType.EMPTY, 	1, 				1, 			1, 			false, 					ParamType.VALID, 	ExpectedType.VOID	},
 				{ParamType.VALID, 	1, 				1, 			0, 			false, 					ParamType.VALID, 	ExpectedType.OK		},
+				{ParamType.VALID, 	1, 				1, 			1, 			false, 					ParamType.VALID,	ExpectedType.OK		},
 				{ParamType.VALID, 	1, 				1, 			0, 			true, 					ParamType.VALID, 	ExpectedType.OK		},
 				{ParamType.VALID, 	1, 				1, 			1, 			false, 					ParamType.EMPTY, 	ExpectedType.FAIL	},
 				{ParamType.VALID, 	1, 				1, 			1, 			false, 					ParamType.NULL, 	ExpectedType.FAIL	},

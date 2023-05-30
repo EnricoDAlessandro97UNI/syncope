@@ -82,13 +82,18 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
                 break;
             case FAIL:
                 this.expected = Mockito.mock(DefaultPropagationReporter.class);
-                // To FIX
+                PropagationStatus statusFail = new PropagationStatus();
+                statusFail.setStatus(ExecStatus.FAILURE);
+                statuses.add(statusFail);
                 break;
             case NULL_PTR_ERROR:
                 this.expectedError = new NullPointerException();
                 break;
             case NOT_FOUND_ERROR:
                 this.expectedError = new NotFoundException("Not found");
+                break;
+            case VOID:
+                this.expected = Mockito.mock(DefaultPropagationReporter.class);
                 break;
         }
         if (expected != null) Mockito.when(this.expected.getStatuses()).thenReturn(statuses);
@@ -97,10 +102,7 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
     private void configureExecution(ParamType taskInfoType, boolean nullPriorityAsync, ParamType executorType) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.initialize();
-        this.taskExecutor = new PriorityPropagationTaskExecutor(null, null, null,
-                null, null, null, null, null,
-                null, null, null, null,
-                null, null, executor);
+        this.taskExecutor = new PriorityPropagationTaskExecutor(null, null, null, null, null, null, null, null, null, null, null, null, null, null, executor);
         this.nullPriorityAsync = nullPriorityAsync;
         configureTaskInfos(taskInfoType);
         configureExecutor(executorType);
@@ -118,9 +120,10 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
                 this.executor = "validExecutor";
                 break;
             case INVALID:
-                // TODO forse non ci sta un executor non valido?
                 this.executor = "invalidExecutor";
                 break;
+			default:
+				break;
         }
     }
 
@@ -140,6 +143,8 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
                 this.taskInfos = new ArrayList<>();
                 this.taskInfos.add(new PropagationTaskInfo(null));
                 break;
+			default:
+				break;
         }
     }
 
@@ -167,25 +172,20 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
     private void configureNoPropResourceKeys(ParamType noPropResourceKeysType) {
         switch (noPropResourceKeysType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.noPropResourceKeys = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.noPropResourceKeys = new ArrayList<>();
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.noPropResourceKeys = new ArrayList<>();
                 this.noPropResourceKeys.add("invalidKey");
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.noPropResourceKeys = new ArrayList<>();
                 this.noPropResourceKeys.add("validKey");
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -194,27 +194,22 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
         Attr attr = new Attr();
         switch (vAttrType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.vAttr = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.vAttr = new ArrayList<>();
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 attr.setSchema("vSchema");
                 this.vAttr = new ArrayList<>();
                 this.vAttr.add(attr);
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 attr.setSchema("invalidSchema");
                 this.vAttr = new ArrayList<>();
                 this.vAttr.add(attr);
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -222,25 +217,20 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
     private void configurePropByRes(ParamType propByResType) {
         switch (propByResType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.propByRes = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.propByRes = new PropagationByResource<>();
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.propByRes = new PropagationByResource<>();
                 this.propByRes.add(ResourceOperation.DELETE, "invalidKey");
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.propByRes = new PropagationByResource<>();
                 this.propByRes.add(ResourceOperation.CREATE, "validKey");
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -249,23 +239,18 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
     private void configureKey(ParamType keyType) {
         switch (keyType) {
             case NULL:
-                System.out.println("CASE NULL");
                 this.key = null;
                 break;
             case EMPTY:
-                System.out.println("CASE EMPTY");
                 this.key = "";
                 break;
             case VALID:
-                System.out.println("CASE VALID");
                 this.key = "validKey";
                 break;
             case INVALID:
-                System.out.println("CASE INVALID");
                 this.key = "invalidKey";
                 break;
             default:
-                System.out.println("CASE DEFAULT");
                 break;
         }
     }
@@ -325,21 +310,21 @@ public class ITCreateAndExecuteTask extends ITPropagationManagerAndExecutor {
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.OK					},
-                {  	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.EMPTY, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.FAIL				},
+                {  	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.EMPTY, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.VOID				},
                 {	AnyTypeKind.USER, 	ParamType.NULL, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR  	},
                 {	AnyTypeKind.USER, 	ParamType.EMPTY, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR 	},
                 {	AnyTypeKind.USER, 	ParamType.INVALID,	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR  	},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	false,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.EMPTY, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.FAIL				},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.INVALID,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.EMPTY, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.VOID				},
+                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.INVALID,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.VOID				},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID,	ExpectedType.OK					},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.NULL, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.OK					},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.INVALID,	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.OK					},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.OK					},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.NULL, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.INVALID,	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.INVALID,	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.VOID				},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, true, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, false, ParamType.VALID, 	ExpectedType.FAIL				},	
+                {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, false, ParamType.VALID, 	ExpectedType.VOID				},	
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.EMPTY, 	ExpectedType.OK					},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.NULL,		ExpectedType.OK					},
                 {	AnyTypeKind.USER, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, true, 	ParamType.INVALID, 	ExpectedType.OK					}

@@ -128,22 +128,17 @@ public abstract class ITPropagationManagerAndExecutor {
         AnyUtilsFactory anyUtilsFactory = Mockito.mock(AnyUtilsFactory.class);
 
         /* User */
-        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.USER))
-                .thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
-        Mockito.when(anyUtilsFactory.getInstance(any(User.class)))
-                .thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.USER)).thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(any(User.class))).thenReturn(new DummyAnyUtils(AnyTypeKind.USER, anyUtilsFactory));
 
         /* AnyObject */
-        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.ANY_OBJECT))
-                .thenReturn(new DummyAnyUtils(AnyTypeKind.ANY_OBJECT, anyUtilsFactory));
-        Mockito.when(anyUtilsFactory.getInstance(any(AnyObject.class)))
-                .thenReturn(new DummyAnyUtils(AnyTypeKind.ANY_OBJECT, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.ANY_OBJECT)).thenReturn(new DummyAnyUtils(AnyTypeKind.ANY_OBJECT, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(any(AnyObject.class))).thenReturn(new DummyAnyUtils(AnyTypeKind.ANY_OBJECT, anyUtilsFactory));
 
         /* Group */
-        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.GROUP))
-                .thenReturn(new DummyAnyUtils(AnyTypeKind.GROUP, anyUtilsFactory));
-        Mockito.when(anyUtilsFactory.getInstance(any(Group.class)))
-                .thenReturn(new DummyAnyUtils(AnyTypeKind.GROUP, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(AnyTypeKind.GROUP)).thenReturn(new DummyAnyUtils(AnyTypeKind.GROUP, anyUtilsFactory));
+        Mockito.when(anyUtilsFactory.getInstance(any(Group.class))).thenReturn(new DummyAnyUtils(AnyTypeKind.GROUP, anyUtilsFactory));
+        
         return anyUtilsFactory;
     }
 
@@ -166,8 +161,7 @@ public abstract class ITPropagationManagerAndExecutor {
         VirSchemaDAO virSchema = Mockito.mock(VirSchemaDAO.class);
         Mockito.when(virSchema.find("vSchema")).thenReturn(this.virSchema);
         virSchema.find("vSchema").setProvision(provision);
-        Mockito.when(virSchema.findByProvision(provision))
-                .thenReturn(new ArrayList<>(Collections.singleton(this.virSchema)));
+        Mockito.when(virSchema.findByProvision(provision)).thenReturn(new ArrayList<>(Collections.singleton(this.virSchema)));
         return virSchema;
     }
     
