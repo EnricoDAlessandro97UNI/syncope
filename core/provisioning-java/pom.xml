@@ -326,14 +326,15 @@ under the License.
               <verbose>true</verbose>
               <targetClasses>
                 <!-- class 1 to test -->
-                <!-- <param>org.apache.syncope.core.provisioning.java.propagation.DefaultPropagationManager</param> -->
+                <param>org.apache.syncope.core.provisioning.java.propagation.DefaultPropagationManager</param>
                 <!-- class 2 to test -->
-                <param>org.apache.syncope.core.provisioning.java.propagation.PriorityPropagationTaskExecutor</param>
+                <!-- <param>org.apache.syncope.core.provisioning.java.propagation.PriorityPropagationTaskExecutor</param> -->
               </targetClasses>
               <targetTests>
                 <!-- test implementations -->
-                <!-- <param>org.apache.syncope.core.provisioning.java.propagation.GetCreateTasksTest</param> -->
-                <param>org.apache.syncope.core.provisioning.java.propagation.ExecuteTaskTest</param>
+                <param>org.apache.syncope.core.provisioning.java.propagation.GetCreateTasksTest</param>
+                <!-- <param>org.apache.syncope.core.provisioning.java.propagation.GetUserCreateTasksTest</param> -->
+                <!-- <param>org.apache.syncope.core.provisioning.java.propagation.ExecuteTaskTest</param> -->
               </targetTests>
             </configuration>
             <executions>

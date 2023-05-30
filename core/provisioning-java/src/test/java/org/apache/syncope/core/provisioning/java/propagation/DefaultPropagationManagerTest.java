@@ -278,7 +278,7 @@ public abstract class DefaultPropagationManagerTest {
         }
     }
 
-    protected void configurePropByRes(ParamType propByResType) {
+    protected void configurePropByRes(ParamType propByResType, boolean repeatedResUpdate, boolean repeatedResDelete, boolean wrongOpRightKey) {
         switch (propByResType) {
             case NULL:
                 System.out.println("CASE NULL");
@@ -296,7 +296,21 @@ public abstract class DefaultPropagationManagerTest {
             case VALID:
                 System.out.println("CASE VALID");
                 this.propByRes = new PropagationByResource<>();
-                this.propByRes.add(ResourceOperation.CREATE, "validKey");
+                if (repeatedResUpdate) {
+                    // Controlla il caso di risorse ripetute in propByRes (mutazione)
+                    this.propByRes.add(ResourceOperation.UPDATE, "validKey");
+                }
+
+                if (repeatedResDelete) {
+                    this.propByRes.add(ResourceOperation.DELETE, "validKey");
+                }
+
+                if (wrongOpRightKey) {
+                    // Controlla il caso con operation sbagliata, ma key valida (mutazione)
+                    this.propByRes.add(ResourceOperation.DELETE, "validKey");
+                } else {
+                    this.propByRes.add(ResourceOperation.CREATE, "validKey");
+                }
                 break;
             default:
                 System.out.println("CASE DEFAULT");

@@ -15,7 +15,7 @@ import java.util.Optional;
 public class AnyObjectTested implements AnyObject {
 	
     private static final long serialVersionUID = 1L;
-	private String key;
+	private String key = "anyObjectTested";
     private AnyType type;
 
     @Override

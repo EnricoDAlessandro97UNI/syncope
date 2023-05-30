@@ -74,12 +74,12 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
     private int numWithPriority; // aggiunta per mutation testing
     
     @SuppressWarnings("deprecation")
-	public ExecuteTaskTest(ParamType taskInfoType, int numElements, int numSamePriority, int numWithPriority, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
+	public ExecuteTaskTest(ParamType taskInfoType, int numElements, int numSamePriority, int numWithPriority, boolean nullPriorityAsync, ParamType executorType, ExpectedType expectedType) {
         MockitoAnnotations.initMocks(this);
-        configure(taskInfoType, numElements, numSamePriority, numWithPriority, nullPriorityAsync, executorType, ExpectedType);
+        configure(taskInfoType, numElements, numSamePriority, numWithPriority, nullPriorityAsync, executorType, expectedType);
     }
 
-    private void configure(ParamType taskInfoType, int numElements, int numSamePriority, int numWithPriority, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
+    private void configure(ParamType taskInfoType, int numElements, int numSamePriority, int numWithPriority, boolean nullPriorityAsync, ParamType executorType, ExpectedType expectedType) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.initialize();
         this.propagationTaskExecutor = new PriorityPropagationTaskExecutor(connectorManager, null, null, null, null, taskDAO, resourceDAO, notificationManager, auditManager, null, null, null, entityFactory, null, executor);
@@ -89,7 +89,7 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
         this.numWithPriority = numWithPriority;
         List<Boolean> withPriority = configureTaskInfos(taskInfoType, numElements, numSamePriority, numWithPriority);
         configureExecutor(executorType);
-        configureResult(ExpectedType, withPriority);
+        configureResult(expectedType, withPriority);
     }
 
     private void configureResult(ExpectedType ExpectedType, List<Boolean> withPriority) {
