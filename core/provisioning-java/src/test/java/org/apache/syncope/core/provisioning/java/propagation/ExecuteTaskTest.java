@@ -67,17 +67,17 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
     private PropagationReporter expected;
 
     @SuppressWarnings("deprecation")
-	public ExecuteTaskTest(ParamType taskInfoType, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
+	public ExecuteTaskTest(ParamType taskInfoType, int numElements, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
         MockitoAnnotations.initMocks(this);
-        configure(taskInfoType, nullPriorityAsync, executorType, ExpectedType);
+        configure(taskInfoType, numElements, nullPriorityAsync, executorType, ExpectedType);
     }
 
-    private void configure(ParamType taskInfoType, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
+    private void configure(ParamType taskInfoType, int numElements, boolean nullPriorityAsync, ParamType executorType, ExpectedType ExpectedType) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.initialize();
         this.propagationTaskExecutor = new PriorityPropagationTaskExecutor(connectorManager, null, null, null, null, null, resourceDAO, notificationManager, auditManager, null, null, null, entityFactory, null, executor);
         this.nullPriorityAsync = nullPriorityAsync;
-        boolean withPriority = configureTaskInfos(taskInfoType);
+        boolean withPriority = configureTaskInfos(taskInfoType, numElements);
         configureExecutor(executorType);
         configureResult(ExpectedType, withPriority);
     }
@@ -134,7 +134,7 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
         }
     }
 
-    private boolean configureTaskInfos(ParamType taskInfoType) {
+    private boolean configureTaskInfos(ParamType taskInfoType, int numElements) {
         boolean withPriority = false;
         switch (taskInfoType) {
             case EMPTY:
@@ -143,17 +143,19 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
                 break;
             case VALID:
                 /* Collezione di task non vuoti con priorità */
-                this.taskInfos = new ArrayList<>();
-                JPAExternalResource resource = new JPAExternalResource();
-                resource.setKey("priorityResource");
-                resource.setPropagationPriority(1);
-                resource.setConnector(new JPAConnInstance());
-                PropagationTaskInfo task = new PropagationTaskInfo(resource);
-                task.setObjectClassName("objectClassName");
-                task.setOperation(ResourceOperation.CREATE);
-                task.setAttributes("[{\"name\":\"__NAME__\",\"value\":[\"Enrico DAlessandro\"]},{\"name\":\"__UID__\",\"value\":[\"erik97\"]}]");
-                this.taskInfos.add(task);
                 withPriority = true;
+                this.taskInfos = new ArrayList<>();
+                for (int i = 0; i < numElements; i++) {
+                    JPAExternalResource resource = new JPAExternalResource();
+                    resource.setKey("priorityResource"+i);
+                    resource.setPropagationPriority(numElements-i); // Verifica ordinamento dei task
+                    resource.setConnector(new JPAConnInstance());
+                    PropagationTaskInfo task = new PropagationTaskInfo(resource);
+                    task.setObjectClassName("objectClassName"+i);
+                    task.setOperation(ResourceOperation.CREATE);
+                    task.setAttributes("[{\"name\":\"__NAME__\",\"value\":[\"Name"+i+"\"]},{\"name\":\"__UID__\",\"value\":[\"uid"+i+"\"]}]");
+                    this.taskInfos.add(task);
+                }
                 break;
             case INVALID:
                 /* Collezione di task non vuoti senza priorità */
@@ -169,14 +171,16 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][] {                
-//             	TASK_INFO_TYPE      NULL_PRIORITY_ASYNC     EXECUTOR       		EXPECTED_RESULT
-              {	ParamType.EMPTY, 	false, 					ParamType.VALID, 	ExpectedType.VOID			},
-              {	ParamType.VALID, 	false, 					ParamType.VALID, 	ExpectedType.OK				},
-              {	ParamType.INVALID, 	false, 					ParamType.VALID,	ExpectedType.VOID			},
-              {	ParamType.INVALID, 	true, 					ParamType.VALID,	ExpectedType.OK 			},
-              {	ParamType.VALID, 	false, 					ParamType.EMPTY,	ExpectedType.FAIL			},
-              {	ParamType.VALID, 	false, 					ParamType.NULL, 	ExpectedType.FAIL			}
-      
+//             	TASK_INFO_TYPE		NUM_ELEMENTS	NULL_PRIORITY_ASYNC     EXECUTOR       		EXPECTED_RESULT
+              {	ParamType.EMPTY, 	1,				false, 					ParamType.VALID, 	ExpectedType.VOID			},
+              {	ParamType.VALID, 	1,				false, 					ParamType.VALID, 	ExpectedType.OK				},
+              {	ParamType.INVALID, 	1,				false, 					ParamType.VALID,	ExpectedType.VOID			},
+              {	ParamType.INVALID, 	1,				true, 					ParamType.VALID,	ExpectedType.OK 			},
+              {	ParamType.VALID, 	1,				false, 					ParamType.EMPTY,	ExpectedType.FAIL			},
+              {	ParamType.VALID, 	1,				false, 					ParamType.NULL, 	ExpectedType.FAIL			},
+              
+              /* For coverage and mutation */
+              {	ParamType.VALID, 	2, 				false, 					ParamType.VALID, 	ExpectedType.OK				}
         });
     }
 
@@ -192,8 +196,7 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
         taskInfos.forEach(taskInfo -> {
             doAnswer(invocationOnMock -> {
                 DefaultPropagationReporter reporter = invocationOnMock.getArgument(1, DefaultPropagationReporter.class);
-                TaskExec exec = propagationTaskExecutor.execute(taskInfo, reporter, "validExecutor");
-                return exec;
+                return propagationTaskExecutor.execute(taskInfo, reporter, "validExecutor");
             }).when(taskExecutor).execute(any(), argThat(propagationReporter -> propagationReporter.getStatuses().isEmpty()), anyString());
 
             /* Mock entityFactory metodo newEntity() */
@@ -222,8 +225,8 @@ public class ExecuteTaskTest extends PriorityPropagationTaskExecutorTest {
             return;
         }
         
-        if (expected.getStatuses().size() > 0) {
-        	assertEquals(expected.getStatuses().get(0).getStatus(), reporter.getStatuses().get(0).getStatus());
+        for (int i = 0; i < expected.getStatuses().size(); i++) {
+            assertEquals(expected.getStatuses().get(i).getStatus(), reporter.getStatuses().get(i).getStatus());
         }
     }
 

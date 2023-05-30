@@ -66,7 +66,7 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
                 {	AnyTypeKind.USER, 		ParamType.VALID,	null, 	ParamType.INVALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.INVALID, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				},
         });
     }
 

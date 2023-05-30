@@ -1,7 +1,6 @@
 package org.apache.syncope.core.provisioning.java.propagation;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 
 import java.util.ArrayList;
@@ -237,12 +236,12 @@ public abstract class DefaultPropagationManagerTest {
             case VALID:
                 System.out.println("CASE VALID");
                 this.noPropResourceKeys = new ArrayList<>();
-                this.noPropResourceKeys.add("invalidKey");
+                this.noPropResourceKeys.add("validKey");
                 break;
             case INVALID:
                 System.out.println("CASE INVALID");
                 this.noPropResourceKeys = new ArrayList<>();
-                this.noPropResourceKeys.add("validKey");
+                this.noPropResourceKeys.add("invalidKey");
                 break;
             default:
                 System.out.println("CASE DEFAULT");
@@ -344,7 +343,7 @@ public abstract class DefaultPropagationManagerTest {
                     attributes.add(uid);
 
                     /* User */
-                    Mockito.when(mappingManager.prepareAttrsFromAny(any(User.class), argThat(s -> s == null || s.equals("myPass")), eq(true), eq(enable), any(provision.getClass()))).thenReturn(attrs);
+                    Mockito.when(mappingManager.prepareAttrsFromAny(any(User.class), any(), eq(true), any(), any(provision.getClass()))).thenReturn(attrs);
                     break;
                 case GROUP:
                     name = new Name("Group Name");

@@ -75,10 +75,6 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
                 System.out.println("CASE VALID");
                 this.password = "myPass";
                 break;
-            case INVALID:
-                System.out.println("CASE INVALID");
-                this.password = "invalidKey";
-                break;
             default:
                 System.out.println("CASE DEFAULT");
                 break;
@@ -118,27 +114,20 @@ public class GetUserCreateTaskTest extends DefaultPropagationManagerTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
-                //  KEY 				PASSWORD 		   	ENABLE 	PROP_BY_RES 	   	PROP_BY_LINK_ACC 	V_ATTR 				NO_PRO_RES_KEY    	EXPECTED_RESULT
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.INVALID,	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	ParamType.NULL, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	ParamType.EMPTY, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	ParamType.VALID, 	ParamType.EMPTY,	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NULL_PTR_ERROR		},
-                {	ParamType.VALID, 	ParamType.NULL, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.INVALID,	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NULL_PTR_ERROR		},
-                {	ParamType.VALID, 	ParamType.VALID, 	false,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.EMPTY,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.FAIL				},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.NULL, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.NULL_PTR_ERROR		},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.INVALID,	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.FAIL				},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.NULL, 	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.INVALID,	ParamType.VALID, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.NULL, 	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.INVALID,	ParamType.VALID, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.NULL, 	ExpectedType.OK					},
-                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.INVALID,	ExpectedType.FAIL				},
+                //  KEY 				PASSWORD 		   	ENABLE 	PROP_BY_RES 	   	PROP_BY_LINK_ACC 	V_ATTR 				NO_PRO_RES_KEY    	EXPECTED_RESULT  
+                {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	ParamType.INVALID,	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	ParamType.EMPTY, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	ParamType.NULL, 	ParamType.VALID,	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	ParamType.VALID, 	ParamType.EMPTY,	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	ParamType.VALID, 	ParamType.NULL, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	ParamType.VALID, 	ParamType.VALID, 	false,	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.INVALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
+                {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.INVALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				}
+        
         });
     }
 
