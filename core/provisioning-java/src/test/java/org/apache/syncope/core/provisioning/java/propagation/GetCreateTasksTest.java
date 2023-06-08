@@ -104,8 +104,13 @@ public class GetCreateTasksTest extends DefaultPropagationManagerTest {
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
                 {	AnyTypeKind.USER, 		ParamType.VALID,	null, 	ParamType.INVALID, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				},
-        
+                {	AnyTypeKind.USER, 		ParamType.INVALID, 	false, 	ParamType.INVALID, 	ParamType.EMPTY, 	ParamType.NULL, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.NULL, 	false, 	ParamType.EMPTY, 	ParamType.INVALID, 	ParamType.NULL, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 	ParamType.NULL, 	ParamType.NULL, 	ParamType.NULL, 	ExpectedType.NULL_PTR_ERROR		},
+                
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 	ParamType.INVALID, 	ParamType.INVALID, 	ParamType.INVALID, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 	ParamType.NULL, 	ParamType.EMPTY, 	ParamType.NULL, 	ExpectedType.NULL_PTR_ERROR		},
+                
                 // coverage & mutation 
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	null,	ParamType.NULL, 	ParamType.EMPTY, 	ParamType.EMPTY,	ExpectedType.FAIL				},
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	null, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},

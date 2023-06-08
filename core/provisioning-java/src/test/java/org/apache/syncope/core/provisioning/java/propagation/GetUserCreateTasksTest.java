@@ -6,8 +6,8 @@ import org.apache.syncope.common.lib.types.AnyTypeKind;
 import org.apache.syncope.common.lib.types.ResourceOperation;
 import org.apache.syncope.core.provisioning.api.PropagationByResource;
 import org.apache.syncope.core.provisioning.api.propagation.PropagationTaskInfo;
-import org.apache.syncope.core.provisioning.java.propagation.utils.ParamType;
 import org.apache.syncope.core.provisioning.java.propagation.utils.ExpectedType;
+import org.apache.syncope.core.provisioning.java.propagation.utils.ParamType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -128,7 +128,13 @@ public class GetUserCreateTasksTest extends DefaultPropagationManagerTest {
                 {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.INVALID, 		false,			ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
                 {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 		false,			ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
                 {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 		false,			ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				},
-        
+                {	ParamType.VALID, 	ParamType.VALID, 	false, 	ParamType.EMPTY, 	ParamType.VALID, 		false,			ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				},
+                {	ParamType.VALID, 	ParamType.VALID, 	false, 	ParamType.NULL, 	ParamType.VALID, 		false,			ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.NULL_PTR_ERROR		},
+                {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.EMPTY, 		false,			ParamType.INVALID, 	ParamType.VALID, 	ExpectedType.FAIL				},
+                {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.NULL, 		false,			ParamType.NULL, 	ParamType.VALID, 	ExpectedType.NULL_PTR_ERROR		},
+                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 		false,			ParamType.EMPTY, 	ParamType.INVALID, 	ExpectedType.OK				    },
+                {	ParamType.VALID, 	ParamType.VALID, 	true, 	ParamType.VALID, 	ParamType.VALID, 		false,			ParamType.EMPTY, 	ParamType.NULL, 	ExpectedType.NULL_PTR_ERROR		},
+                
                 // Coverage & Mutation
                 {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.VALID, 	ParamType.VALID, 		true, 			ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				}, 
                 {	ParamType.VALID, 	ParamType.VALID, 	null, 	ParamType.EMPTY, 	ParamType.VALID, 		true, 			ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				}, 
