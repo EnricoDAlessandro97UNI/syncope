@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.*;
 @RunWith(Parameterized.class)
 public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
 
-    private boolean changePwd;
+	private boolean changePwd;
     private PropagationByResource<Pair<String, String>> propByLinkedAccount;
 
     public GetUpdateTasksTest(AnyTypeKind anyTypeKind, ParamType keyType, boolean changePwd, Boolean enable, ParamType propByResType, ParamType propByLinkedType, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType expectedType) {
@@ -81,6 +81,7 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
                 this.noPropResourceKeys = new ArrayList<>();
                 break;
             default:
+                /* case NULL */
                 break;
         }
     }
@@ -95,7 +96,11 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
             case INVALID:
                 linked.add(ResourceOperation.DELETE, pair);
                 break;
+            case NULL:
+                linked = null;
+                break;
             default:
+                /* case EMPTY */
                 break;
         }
         this.propByLinkedAccount = linked;
@@ -127,12 +132,19 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.NULL, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.VALID, 	ParamType.INVALID, 	ExpectedType.NULL_PTR_ERROR		},
                 {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.VALID, 	ParamType.NULL, 	ExpectedType.NULL_PTR_ERROR		}, 
+                
+                // for coverage and mutation
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.EMPTY, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.NULL, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.NULL, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.NULL, 	ExpectedType.OK					}
         });
     }
 
     @Before
     public void setUpMocks() {
-        Mockito.when(mappingManager.prepareAttrsFromAny(any(), argThat(s -> s == null || s.equals("myPass")), eq(changePwd), eq(enable), any(provision.getClass()))).thenAnswer(invocationOnMock -> {
+        Mockito.when(mappingManager.prepareAttrsFromAny(any(), argThat(s -> s == null || s.equals("myPass")), eq(changePwd), eq(enable), any(provision.getClass())))
+                .thenAnswer(invocationOnMock -> {
             Set<Attribute> attributes = new HashSet<>();
             String[] connObjectKeyValue = new String[1];
 
