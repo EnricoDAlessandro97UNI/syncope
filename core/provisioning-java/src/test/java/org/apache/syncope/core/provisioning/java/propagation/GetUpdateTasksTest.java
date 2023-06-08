@@ -26,12 +26,15 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
 	private boolean changePwd;
     private PropagationByResource<Pair<String, String>> propByLinkedAccount;
 
-    public GetUpdateTasksTest(AnyTypeKind anyTypeKind, ParamType keyType, boolean changePwd, Boolean enable, ParamType propByResType, ParamType propByLinkedType, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType expectedType) {
+    /* For mutation testing */
+    private boolean noProp;
+
+    public GetUpdateTasksTest(AnyTypeKind anyTypeKind, ParamType keyType, boolean changePwd, Boolean enable, ParamType propByResType, ParamType propByLinkedType, boolean noProp, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType expectedType) {
         super(anyTypeKind);
-        configure(anyTypeKind, keyType, enable, changePwd, propByResType, propByLinkedType, vAttrType, noPropResourceKeysType, expectedType);
+        configure(anyTypeKind, keyType, enable, changePwd, propByResType, propByLinkedType, noProp, vAttrType, noPropResourceKeysType, expectedType);
     }
 
-    private void configure(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable, boolean changePwd, ParamType propByResType, ParamType propByLinkedType, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType expectedType) {
+    private void configure(AnyTypeKind anyTypeKind, ParamType keyType, Boolean enable, boolean changePwd, ParamType propByResType, ParamType propByLinkedType, boolean noProp, ParamType vAttrType, ParamType noPropResourceKeysType, ExpectedType expectedType) {
         this.propagationManager = new DefaultPropagationManager(
                 virSchemaDAO,
                 externalResourceDAO,
@@ -45,16 +48,18 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
         this.anyTypeKind = anyTypeKind;
         this.enable = enable;
         this.changePwd = changePwd;
+        this.noProp = noProp;
 
         configureAnyType(anyTypeKind, this.getClass().getName());
         configureKey(keyType);
         configurePropByRes(propByResType);
-        configurePropByLinkedAccount(propByLinkedType);
+        configurePropByLinkedAccount(propByLinkedType, noProp);
         configureVAttr(vAttrType);
         configureNoPropResourceKeys(noPropResourceKeysType);
         configureExpected(expectedType);
     }
 
+    @Override
     protected void configurePropByRes(ParamType propByResType) {
         switch (propByResType) {
             case INVALID:
@@ -71,6 +76,7 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
 
     }
 
+    @Override
     protected void configureNoPropResourceKeys(ParamType noPropResourceKeysType) {
         switch (noPropResourceKeysType) {
             case VALID:
@@ -86,9 +92,12 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
         }
     }
 
-    private void configurePropByLinkedAccount(ParamType propByLinkedType) {
+    private void configurePropByLinkedAccount(ParamType propByLinkedType, boolean noProp) {
         Pair<String, String> pair = new ImmutablePair<>("resourceKey", "connObjectKey");
         PropagationByResource<Pair<String, String>> linked = new PropagationByResource<>();
+        if (noProp) {
+            pair = new ImmutablePair<>("validKey", "myAccount");
+        }
         switch (propByLinkedType) {
             case VALID:
                 linked.add(ResourceOperation.UPDATE, pair);
@@ -98,6 +107,10 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
                 break;
             case NULL:
                 linked = null;
+                break;
+            case KILL_MUTANT:
+                /* case added to kill mutant n° 290 */
+                linked.add(ResourceOperation.CREATE, pair);
                 break;
             default:
                 /* case EMPTY */
@@ -109,35 +122,42 @@ public class GetUpdateTasksTest extends DefaultPropagationManagerTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
-                //  KIND 					PASSWORD			CHANGE_PWD, ENABLE, PROP_BY_RES, 		PROP_BY_LINK_ACC,		V_ATTR 				NO_PROP_RES_KEY 	EXPECTED_RESULT_TYPE
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.GROUP, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.ANY_OBJECT, ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.INVALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	AnyTypeKind.USER, 		ParamType.NULL, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		true, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		false, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.INVALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.INVALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				},
-                {	AnyTypeKind.USER, 		ParamType.INVALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	AnyTypeKind.USER, 		ParamType.NULL, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.EMPTY, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.NULL, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.EMPTY, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.NULL, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.INVALID, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.NULL, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.VALID, 	ParamType.INVALID, 	ExpectedType.NULL_PTR_ERROR		},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.VALID, 	ParamType.NULL, 	ExpectedType.NULL_PTR_ERROR		}, 
+                //  KIND 					PASSWORD			CHANGE_PWD, ENABLE, PROP_BY_RES, 		PROP_BY_LINK_ACC,		NO_PROP	V_ATTR 				NO_PROP_RES_KEY 	EXPECTED_RESULT_TYPE
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.GROUP, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.ANY_OBJECT, ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.INVALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.NULL, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		true, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		false, 	ParamType.VALID, 	ParamType.VALID, 		false,  ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.INVALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.INVALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.VALID, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 		ParamType.INVALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.NULL, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NOT_FOUND_ERROR	},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.EMPTY, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.NULL, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.EMPTY, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.NULL, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.INVALID, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.NULL, 	ParamType.EMPTY, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.VALID, 	ParamType.INVALID, 	ExpectedType.NULL_PTR_ERROR		},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	false, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.VALID, 	ParamType.NULL, 	ExpectedType.NULL_PTR_ERROR		}, 
                 
                 // for coverage and mutation
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.EMPTY, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.NULL, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.NULL, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
-                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		ParamType.EMPTY, 	ParamType.NULL, 	ExpectedType.OK					}
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.EMPTY, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.NULL, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.NULL, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.FAIL				},
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.VALID, 	ParamType.VALID, 		false,	ParamType.EMPTY, 	ParamType.NULL, 	ExpectedType.OK					},
+        
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.EMPTY, 	ParamType.VALID, 		true,	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				}, 	/* kill mutant n° 292 */
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.EMPTY, 	ParamType.VALID, 		true, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					}, 	/* kill mutant n° 292 */
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true,	 	null, 	ParamType.EMPTY, 	ParamType.INVALID, 		true, 	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				}, 	/* kill mutant n° 294 */
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.EMPTY, 	ParamType.INVALID, 		true, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					}, 	/* kill mutant n° 294 */
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.EMPTY, 	ParamType.KILL_MUTANT, 	true, 	ParamType.EMPTY, 	ParamType.VALID, 	ExpectedType.FAIL				},  /* kill mutant n° 290 */
+                {	AnyTypeKind.USER, 		ParamType.VALID, 	true, 		null, 	ParamType.EMPTY, 	ParamType.KILL_MUTANT, 	true, 	ParamType.EMPTY, 	ParamType.EMPTY, 	ExpectedType.OK					}   /* kill mutant n° 290 */
         });
     }
 
